@@ -7,13 +7,14 @@ import java.util.*;
 
 public class UserDaoJDBCImpl implements UserDao {
     private int idUser = 1;
-    Util util = new Util();
-    Connection connection = util.getConnection();
+    private Util util = new Util();
+//    private Connection connection = util.getConnection();
     public UserDaoJDBCImpl() {
 
     }
 
     public void createUsersTable() {
+        Connection connection = util.getConnection();
         String mySqlReq = "CREATE TABLE IF NOT EXISTS user(" +
                 "id LONG," +
                 "name VARCHAR(45)," +
@@ -21,33 +22,35 @@ public class UserDaoJDBCImpl implements UserDao {
                 "age INT)";
         try (PreparedStatement preStatement = connection.prepareStatement(mySqlReq)) {
             preStatement.executeUpdate();
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
     }
 
     public void dropUsersTable() {
+        Connection connection = util.getConnection();
         String mySqlReq = "DROP TABLE IF EXISTS user";
         idUser = 1;
         try (PreparedStatement preStatement = connection.prepareStatement(mySqlReq)) {
             preStatement.executeUpdate();
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
-//        PreparedStatement preStatement = null;
+        Connection connection = util.getConnection();
         String mySqlReq = "INSERT INTO user (id, name, lastName, age) VALUES (?, ?, ?, ?)";
         try (PreparedStatement preStatement = connection.prepareStatement(mySqlReq)){
-
-//        try (PreparedStatement preStatement = util.getConnection().prepareStatement(mySqlReq)) {
-            //            PreparedStatement preStatement = util.getConnection().prepareStatement(mySqlReq)
             preStatement.setLong(1, idUser);
             preStatement.setString(2, name);
             preStatement.setString(3, lastName);
             preStatement.setByte(4, age);
             preStatement.executeUpdate();
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -55,21 +58,21 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
+        Connection connection = util.getConnection();
         String mySqlReq = "DELETE FROM user WHERE id=?";
         try (PreparedStatement preStatement = connection.prepareStatement(mySqlReq)) {
             preStatement.setLong(1, id);
             preStatement.executeUpdate();
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public List<User> getAllUsers() {
+        Connection connection = util.getConnection();
         List<User> userList = new ArrayList<>();
         String mySqlReq = "SELECT id, name, lastName, age FROM user";
-//        (PreparedStatement preStatement = util.getConnection().prepareStatement(mySqlReq))
-//        (PreparedStatement preStatement = (PreparedStatement) util.getConnection().createStatement())
-
         try (Statement statement = connection.createStatement()){
             ResultSet resultSet = statement.executeQuery(mySqlReq);
             while(resultSet.next()) {
@@ -79,6 +82,7 @@ public class UserDaoJDBCImpl implements UserDao {
                 arrayUser.setLastName(resultSet.getString("lastName"));
                 arrayUser.setAge(resultSet.getByte("age"));
                 userList.add(arrayUser);
+                connection.close();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -87,9 +91,11 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
+        Connection connection = util.getConnection();
         String mySqlReq = "DELETE FROM user";
         try (PreparedStatement preStatement = connection.prepareStatement(mySqlReq)) {
             preStatement.executeUpdate();
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
